@@ -1,0 +1,43 @@
+# Loaded automatically alongside docker-compose.yml when you run
+# `docker compose up` — no extra flag needed. Holds everything that's
+# convenient for local dev but wrong for production.
+
+services:
+  app:
+    build:
+      args:
+        APP_ENV: local
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+    volumes:
+      - .:/var/www/html
+      - vendor-data:/var/www/html/vendor
+    # The image's CMD is php-fpm running as root (its intended startup
+    # mode — see Dockerfile comment). We extend that here with two
+    # pre-steps: (1) chown the named vendor volume, which Docker creates
+    # root-owned regardless of anything in the image, and (2) chown
+    # storage/bootstrap-cache, since the bind mount of the whole project
+    # (".:/var/www/html") overwrites whatever ownership the Dockerfile
+    # set at build time. Composer itself is dropped to "www" via su-exec
+    # since it has no legitimate reason to run as root.
+    user: root
+    command: >
+      sh -c "chown -R www:www /var/www/html/vendor /var/www/html/storage /var/www/html/bootstrap/cache &&
+             su-exec www composer install --no-interaction &&
+             php-fpm"
+
+  nginx:
+    ports:
+      - "${APP_PORT:-80}:80"
+
+  postgres:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+volumes:
+  vendor-data:
