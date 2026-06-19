@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/risqid/laravel-docker:latest
+    image: ghcr.io/risqid/laravel-docker:${APP_VERSION}
     restart: unless-stopped
     env_file:
       - .env
