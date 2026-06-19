@@ -117,3 +117,27 @@ jobs:
           file: docker/php/Dockerfile
           push: true
           tags: ghcr.io/risqid/laravel-docker:latest
+  deploy:
+    needs: build-image
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+
+          script: |
+            cd /opt/laravel-docker
+
+            docker compose -f docker-compose.prod.yml pull
+
+            docker compose -f docker-compose.prod.yml up -d
+
+            docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
+
+            docker compose -f docker-compose.prod.yml exec -T app php artisan optimize
