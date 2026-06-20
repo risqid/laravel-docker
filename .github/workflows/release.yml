@@ -6,10 +6,32 @@ on:
       - "v*"
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/php/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/risqid/laravel-docker:${{ github.ref_name }}
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -19,6 +41,8 @@ jobs:
 
           script: |
             cd /opt/laravel-docker
+
+            sed -i "s/^APP_VERSION=.*/APP_VERSION=${{ github.ref_name }}/" .env
 
             docker compose -f docker-compose.prod.yml pull
 
