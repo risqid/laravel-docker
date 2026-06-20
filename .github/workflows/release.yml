@@ -40,7 +40,17 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
 
           script: |
+            whoami
+            
             cd /opt/laravel-docker
+
+            pwd
+
+            ls -l .env
+
+            sed -i "s/^APP_VERSION=.*/APP_VERSION=${{ github.ref_name }}/" .env
+
+            grep APP_VERSION .env
 
             sed -i "s/^APP_VERSION=.*/APP_VERSION=${{ github.ref_name }}/" .env
 
