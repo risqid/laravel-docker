@@ -23,14 +23,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push release image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/php/Dockerfile
-          push: true
-          tags: |
+      - name: Retag CI image as release
+        run: |
+          docker pull ghcr.io/risqid/laravel-docker:${{ github.sha }}
+
+          docker tag \
+            ghcr.io/risqid/laravel-docker:${{ github.sha }} \
             ghcr.io/risqid/laravel-docker:${{ github.ref_name }}
+
+          docker push ghcr.io/risqid/laravel-docker:${{ github.ref_name }}
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.2
