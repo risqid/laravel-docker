@@ -90,32 +90,3 @@ jobs:
           DB_USERNAME: laravel
           DB_PASSWORD: secret
           REDIS_HOST: 127.0.0.1
-
-  build-image:
-    needs: tests
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/php/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/risqid/laravel-docker:latest
-            ghcr.io/risqid/laravel-docker:${{ github.sha }}
