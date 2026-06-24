@@ -16,6 +16,8 @@ services:
       APP_ENV: ${APP_ENV:-production}
     env_file:
       - .env
+    volumes:
+    - uploads-data:/var/www/html/storage/app/public
     networks:
       - app-network
 
@@ -29,6 +31,7 @@ services:
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./public:/var/www/html/public:ro
+      - uploads-data:/var/www/html/storage/app/public:ro
     networks:
       - app-network
 
@@ -87,3 +90,4 @@ networks:
 volumes:
   postgres-data:
   redis-data:
+  uploads-data:

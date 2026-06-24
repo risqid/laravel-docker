@@ -56,6 +56,10 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY --from=vendor /app/vendor /var/www/html/vendor
@@ -79,4 +83,5 @@ RUN addgroup -g 1000 -S www \
 
 EXPOSE 9000
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
