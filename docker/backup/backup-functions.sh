@@ -106,6 +106,52 @@ create_archive() {
     success "Backup archive created."
 }
 
+apply_retention() {
+
+    if [[ "$BACKUP_RETENTION_ENABLED" != true ]]; then
+        return
+    fi
+
+    info "Applying backup retention..."
+
+    mapfile -t archives < <(
+        find "$BACKUP_DIR" \
+            -maxdepth 1 \
+            -type f \
+            -name "*.tar.gz" \
+            | sort
+    )
+
+    local total
+    local remove_count
+    local archive
+    local i
+
+    total="${#archives[@]}"
+
+    info "Keeping latest $BACKUP_RETENTION_COUNT backup(s)."
+
+    if (( total <= BACKUP_RETENTION_COUNT )); then
+        info "No old backups to remove."
+        return
+    fi
+
+    remove_count=$((total - BACKUP_RETENTION_COUNT))
+
+    for ((i = 0; i < remove_count; i++)); do
+
+        archive="$(basename "${archives[$i]}")"
+
+        info "Removing: $archive"
+
+        rm -f "${archives[$i]}"
+
+    done
+
+    success "Backup retention completed."
+
+}
+
 perform_backup() {
     prepare_tmp_dir "$TMP_DIR"
 
@@ -120,6 +166,8 @@ perform_backup() {
 
     create_archive
     ensure_file_exists "$BACKUP_ARCHIVE"
+
+    apply_retention
 
     cleanup_tmp_dir "$TMP_DIR"
 }

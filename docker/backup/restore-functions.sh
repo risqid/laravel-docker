@@ -189,6 +189,12 @@ restore_database() {
     db_name="$(get_env DB_DATABASE)"
     db_user="$(get_env DB_USERNAME)"
 
+    docker_compose exec -T "$POSTGRES_SERVICE" \
+        psql \
+        --username="$db_user" \
+        --dbname="$db_name" \
+        -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
     cat "$RESTORE_TMP_DIR/$DATABASE_FILE" \
         | docker_compose exec -T "$POSTGRES_SERVICE" \
             pg_restore \

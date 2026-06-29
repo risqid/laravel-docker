@@ -4,8 +4,8 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "$SCRIPT_DIR/config.sh"
 source "$SCRIPT_DIR/lib.sh"
+source "$SCRIPT_DIR/config.sh"
 source "$SCRIPT_DIR/backup-functions.sh"
 source "$SCRIPT_DIR/restore-functions.sh"
 

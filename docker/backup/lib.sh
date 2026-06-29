@@ -39,6 +39,18 @@ ensure_service_running() {
 
 }
 
+ensure_positive_integer() {
+
+    local value="$1"
+    local name="$2"
+
+    if ! [[ "$value" =~ ^[1-9][0-9]*$ ]]; then
+        error "$name must be a positive integer."
+        exit 1
+    fi
+
+}
+
 ########################################
 # Timestamp
 ########################################
@@ -153,6 +165,9 @@ get_env() {
         error "Environment variable '$key' not found."
         exit 1
     fi
+
+    value="${value%\"}"
+    value="${value#\"}"
 
     printf '%s\n' "$value"
 
