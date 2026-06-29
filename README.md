@@ -161,14 +161,16 @@ Please refer to:
 docker/backup/README.md
 ```
 
-The backup system includes:
+The guide includes:
 
-* PostgreSQL database backup
-* Upload backup (`storage/app/public`)
-* Restore automation
-* Backup metadata
-* rclone integration for off-site storage
-* Disaster Recovery workflow
+* PostgreSQL backup and restore
+* Upload backup and restore (`storage/app/public`)
+* Automatic pre-restore backup
+* Local backup retention
+* Remote backup (rclone)
+* Remote backup retention
+* Metadata validation
+* Disaster Recovery ready
 
 ---
 

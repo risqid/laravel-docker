@@ -7,7 +7,11 @@ Laravel Docker menyediakan mekanisme backup dan restore bawaan yang dirancang un
 * PostgreSQL backup
 * PostgreSQL restore
 * Upload backup (`storage/app/public`)
+* Upload restore
 * Automatic pre-restore backup
+* Local backup retention
+* Remote backup (rclone)
+* Remote backup retention
 * Maintenance mode during restore
 * Backup metadata validation
 * Single `.tar.gz` archive
@@ -24,6 +28,26 @@ Setiap backup berisi:
 * `metadata.json`
 
 Redis tidak dibackup karena digunakan sebagai cache, queue, dan session storage.
+
+---
+
+# Backup Workflow
+
+Each backup follows the workflow below:
+
+1. Backup PostgreSQL database
+2. Backup uploaded files
+3. Generate metadata
+4. Create compressed archive
+5. Apply local backup retention
+6. Upload archive to remote storage (optional)
+7. Apply remote backup retention (optional)
+
+This workflow ensures that:
+
+* backup retention is applied only after a successful archive creation;
+* remote upload is performed only after a successful local backup;
+* remote retention is executed only after a successful remote upload.
 
 ---
 
@@ -71,6 +95,54 @@ Archive:
 ```
 
 ---
+
+# Local Backup Retention
+
+Only the newest local backups are kept automatically. Retention is applied only after a backup archive has been successfully created.
+
+Configuration:
+
+```dotenv
+BACKUP_RETENTION_ENABLED=true
+BACKUP_RETENTION_COUNT=7
+```
+
+---
+
+# Remote Backup
+
+Remote backup is optional and uses rclone to upload backup archives to supported cloud storage providers.
+
+Supported providers include:
+
+* Google Drive
+* Backblaze B2
+* Amazon S3
+* Cloudflare R2
+* Wasabi
+* OneDrive
+* Dropbox
+* Any storage supported by rclone
+
+Configuration:
+
+```dotenv
+BACKUP_REMOTE_ENABLED=true
+BACKUP_REMOTE_NAME=backup
+BACKUP_REMOTE_PATH=backups/laravel-docker
+```
+
+---
+
+# Remote Backup Retention
+
+Remote backup retention automatically removes old backup archives from the configured remote storage.
+
+Configuration:
+
+```dotenv
+BACKUP_REMOTE_RETENTION_ENABLED=true
+BACKUP_REMOTE_RETENTION_COUNT=30
 
 # Restore Backup
 
@@ -122,7 +194,7 @@ Contoh:
 {
   "backup_format": 1,
   "app_name": "laravel-docker",
-  "app_version": "v1.2.0",
+  "app_version": "dev",
   "app_env": "production",
   "created_at": "2026-06-27T15:18:29+07:00",
   "backup_name": "laravel-docker",
@@ -153,6 +225,10 @@ Host harus memiliki:
 * Docker Compose
 * GNU tar
 
+Optional:
+
+* rclone (required only when using remote backups)
+
 ---
 
 # Notes
@@ -169,7 +245,8 @@ Host harus memiliki:
 
 Planned improvements:
 
-* Backup retention
-* rclone integration
-* Cloud backup guides
+* Remote restore
+* Remote backup browser
+* Google Drive guide
+* Backblaze B2 guide
 * Disaster Recovery guide

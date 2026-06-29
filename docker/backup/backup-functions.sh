@@ -152,6 +152,84 @@ apply_retention() {
 
 }
 
+upload_remote() {
+
+    if [[ "$BACKUP_REMOTE_ENABLED" != true ]]; then
+        return
+    fi
+
+    info "Uploading backup..."
+
+    ensure_rclone_installed
+    ensure_rclone_remote
+
+    local remote
+
+    remote="${BACKUP_REMOTE_NAME}:${BACKUP_REMOTE_PATH}"
+
+    if ! rclone copy \
+        "$BACKUP_ARCHIVE" \
+        "$remote"
+    then
+        error "Failed to upload backup."
+        exit 1
+    fi
+
+    success "Backup uploaded."
+
+}
+
+apply_remote_retention() {
+
+    if [[ "$BACKUP_REMOTE_ENABLED" != true ]]; then
+        return
+    fi
+
+    if [[ "$BACKUP_REMOTE_RETENTION_ENABLED" != true ]]; then
+        return
+    fi
+
+    info "Applying remote backup retention..."
+
+    local remote
+    local total
+    local remove_count
+    local archive
+    local i
+
+    remote="${BACKUP_REMOTE_NAME}:${BACKUP_REMOTE_PATH}"
+
+    mapfile -t archives < <(
+        rclone lsf "$remote" 2>/dev/null \
+            | grep '\.tar\.gz$' \
+            | sort
+    )
+
+    total="${#archives[@]}"
+
+    info "Keeping latest $BACKUP_REMOTE_RETENTION_COUNT remote backup(s)."
+
+    if (( total <= BACKUP_REMOTE_RETENTION_COUNT )); then
+        info "No old remote backups to remove."
+        return
+    fi
+
+    remove_count=$((total - BACKUP_REMOTE_RETENTION_COUNT))
+
+    for ((i = 0; i < remove_count; i++)); do
+
+        archive="${archives[$i]}"
+
+        info "Removing: $archive"
+
+        rclone deletefile "$remote/$archive"
+
+    done
+
+    success "Remote backup retention completed."
+
+}
+
 perform_backup() {
     prepare_tmp_dir "$TMP_DIR"
 
@@ -168,6 +246,9 @@ perform_backup() {
     ensure_file_exists "$BACKUP_ARCHIVE"
 
     apply_retention
+
+    upload_remote
+    apply_remote_retention
 
     cleanup_tmp_dir "$TMP_DIR"
 }

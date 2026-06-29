@@ -51,6 +51,25 @@ ensure_positive_integer() {
 
 }
 
+ensure_rclone_installed() {
+
+    require_command rclone
+
+}
+
+ensure_rclone_remote() {
+
+    local remotes
+
+    remotes="$(rclone listremotes 2>/dev/null)"
+
+    if ! grep -qx "${BACKUP_REMOTE_NAME}:" <<< "$remotes"; then
+        error "rclone remote '$BACKUP_REMOTE_NAME' not found."
+        exit 1
+    fi
+
+}
+
 ########################################
 # Timestamp
 ########################################

@@ -18,6 +18,9 @@ main() {
     ensure_positive_integer \
         "$BACKUP_RETENTION_COUNT" \
         "BACKUP_RETENTION_COUNT"
+    ensure_positive_integer \
+        "$BACKUP_REMOTE_RETENTION_COUNT" \
+        "BACKUP_REMOTE_RETENTION_COUNT"
     ensure_service_running "$POSTGRES_SERVICE"
     ensure_service_running "$APP_SERVICE"
 

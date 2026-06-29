@@ -56,3 +56,13 @@ readonly POSTGRES_SERVICE="postgres"
 ########################################
 
 readonly UPLOADS_PATH="/var/www/html/storage/app/public"
+
+########################################
+# Remote Backup
+########################################
+
+readonly BACKUP_REMOTE_ENABLED="$(get_env BACKUP_REMOTE_ENABLED)"
+readonly BACKUP_REMOTE_NAME="$(get_env BACKUP_REMOTE_NAME)"
+readonly BACKUP_REMOTE_PATH="$(get_env BACKUP_REMOTE_PATH)"
+readonly BACKUP_REMOTE_RETENTION_ENABLED="$(get_env BACKUP_REMOTE_RETENTION_ENABLED)"
+readonly BACKUP_REMOTE_RETENTION_COUNT="$(get_env BACKUP_REMOTE_RETENTION_COUNT)"
